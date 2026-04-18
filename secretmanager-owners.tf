@@ -18,8 +18,8 @@ locals {
   }
   owner_credentials = {
     for k, db in var.databases : k => {
-      username    = mssql_login.owner[k].server_login
-      password    = random_password.owner[k].result
+      username    = module.db.owner_usernames["${k}_owner"]
+      password    = module.db.owner_passwords["${k}_owner"]
       host        = local.mssql_conn.host
       port        = local.mssql_conn.port
       dbname      = db.name
@@ -34,7 +34,7 @@ resource "google_secret_manager_secret" "owner" {
   secret_id = local.owner_secret_ids[each.key]
   project   = data.google_project.current.project_id
   labels = merge(local.all_tags, {
-    "mssql-username" = mssql_login.owner[each.key].server_login
+    "mssql-username" = module.db.owner_usernames["${each.key}_owner"]
     "mssql-database" = each.value.name
     "mssql-server"   = local.mssql_conn.server_name
   })
