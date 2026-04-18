@@ -1,1 +1,88 @@
 # Module configuration
+
+# cloudsql: # (Optional) Cloud SQL MSSQL instance connection settings.
+#   enabled: false          # (Optional) Enable Cloud SQL connection mode. Default: false.
+#   instance_name: ""       # (Required when enabled) Cloud SQL instance name.
+#   project_id: ""          # (Optional) GCP project ID. Defaults to current project.
+#   from_secret: false      # (Optional) Read connection info from an existing Secret Manager secret. Default: false.
+#   secret_id: ""           # (Required when from_secret=true) Secret Manager secret ID containing JSON with host/port/username/password/dbname.
+#   server_name: ""         # (Optional) Logical server name used in secret paths. Defaults to instance_name.
+#   admin_username: "sqladmin" # (Optional) Admin username. Default: sqladmin.
+#   admin_password: ""      # (Required when enabled and from_secret=false) Admin password.
+#   db_name: "master"       # (Optional) Default database. Default: master.
+cloudsql:
+  enabled: false
+  instance_name: ""
+  project_id: ""
+  from_secret: false
+  secret_id: ""
+  server_name: ""
+  admin_username: "sqladmin"
+  admin_password: ""
+  db_name: "master"
+
+# direct: # (Optional) Direct TCP MSSQL connection settings (used when cloudsql.enabled=false and hoop.enabled=false).
+#   server_name: ""  # (Optional) Logical server name used in secret paths.
+#   host: ""         # (Required) Hostname or IP address of the SQL Server.
+#   port: 1433       # (Optional) TCP port. Default: 1433.
+#   username: ""     # (Required) Admin username.
+#   password: ""     # (Required) Admin password.
+#   db_name: "master" # (Optional) Default database. Default: master.
+direct:
+  server_name: ""
+  host: ""
+  port: 1433
+  username: ""
+  password: ""
+  db_name: "master"
+
+# databases: # (Optional) Map of SQL Server databases to manage.
+#   <db_ref>:
+#     name: "dbname"                              # (Required) Database name.
+#     create_owner: false                         # (Optional) Create a dedicated owner login. Default: false.
+#     owner: "ownername"                          # (Optional) Owner login name. Defaults to <name>_owner.
+#     default_collation: "SQL_Latin1_General_CP1_CI_AS" # (Optional) Database collation.
+#     default_language: "us_english"             # (Optional) Default language for the owner login. Default: us_english.
+#     check_password_expiration: false           # (Optional) Enforce password expiration for owner. Default: false.
+#     check_password_policy: true                # (Optional) Enforce password policy for owner. Default: true.
+#     must_change_password: false                # (Optional) Force password change on first login. Default: false.
+databases: {}
+
+# users: # (Optional) Map of SQL Server logins to create.
+#   <user_ref>:
+#     name: "username"                   # (Required) SQL Server login name.
+#     grant: "readwrite"                 # (Required) Permission level: owner, readwrite, readonly.
+#     db_ref: "db_ref"                   # (Optional) Key into the databases map to resolve the database name.
+#     database_name: "dbname"            # (Optional) Database name when db_ref is not set.
+#     default_language: "us_english"     # (Optional) Default: us_english.
+#     check_password_expiration: false   # (Optional) Default: false.
+#     check_password_policy: true        # (Optional) Default: true.
+#     must_change_password: false        # (Optional) Default: false.
+#     import: false                      # (Optional) Import existing login instead of creating. Default: false.
+#     hoop:
+#       access_control: []               # (Optional) Per-user hoop access control list.
+users: {}
+
+# hoop: # (Optional) Hoop connection integration settings.
+#   enabled: false          # (Optional) Enable hoop integration. Default: false.
+#   agent_id: ""            # (Required when enterprise mode) Hoop agent ID.
+#   community: true         # (Optional) Use community (non-enterprise) mode. Default: true. Enterprise mode creates per-user secrets.
+#   import: false           # (Optional) Import existing hoop connections. Default: false.
+#   tags: {}                # (Optional) Tags to attach to hoop connections.
+#   access_control: []      # (Optional) Default access control list for all connections.
+hoop:
+  enabled: false
+  agent_id: ""
+  community: true
+  import: false
+  tags: {}
+  access_control: []
+
+# password_rotation_period: 90 # (Optional) Password rotation period in days. Default: 90.
+password_rotation_period: 90
+
+# force_reset: false # (Optional) Force reset all passwords. Default: false.
+force_reset: false
+
+# secrets_kms_key_name: null # (Optional) GCP KMS key name for CMEK encryption of Secret Manager secrets. Default: null (Google-managed keys).
+secrets_kms_key_name: null

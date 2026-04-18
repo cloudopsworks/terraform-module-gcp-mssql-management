@@ -1,37 +1,113 @@
-name: Terraform Transit Gateway Module
+name: Terraform GCP MSSQL Management Module
 #logo: logo/logo.jpg
 badges:
   - name: Latest Release
-    image: https://img.shields.io/github/release/<owner/repo>.svg?style=for-the-badge
-    url: https://github.com/<owner/repo>/releases/latest
+    image: https://img.shields.io/github/release/cloudopsworks/terraform-module-gcp-mssql-management.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-gcp-mssql-management/releases/latest
   - name: Last Updated
-    image: https://img.shields.io/github/last-commit/<owner/repo>.svg?style=for-the-badge
-    url: https://github.com/<owner/repo>/commits
+    image: https://img.shields.io/github/last-commit/cloudopsworks/terraform-module-gcp-mssql-management.svg?style=for-the-badge
+    url: https://github.com/cloudopsworks/terraform-module-gcp-mssql-management/commits
 
 license: "APACHE2"
 
 copyrights:
   - name: "Cloud Ops Works LLC"
     url: "https://cloudopsworks.co"
-    year: "2026"
+    year: "2021"
 
-github_repo: <owner/repo>
+github_repo: cloudopsworks/terraform-module-gcp-mssql-management
 
 description: |-
-  <description>
+  Terraform module for managing SQL Server logins and databases on GCP using the mssql Terraform provider.
+  Credentials are stored in GCP Secret Manager. Supports Cloud SQL MSSQL instances, direct connections,
+  and Hoop enterprise integration for secure database access.
 
-# Introduction to the project
 introduction: |-
-#  This is an introduction.
+  This module provisions SQL Server logins and databases on GCP, storing credentials securely in
+  GCP Secret Manager. It supports three connection modes: Cloud SQL (direct or via a pre-existing
+  secret), direct TCP connection, and hoop-proxied connections. The hoop output with per-user
+  Secret Manager secrets is available only in enterprise (non-community) mode.
 
-# How to use this project
 usage: |-
+  ```hcl
+  # terragrunt.hcl example
 
-# Example usage
+  terraform {
+    source = "git::https://github.com/cloudopsworks/terraform-module-gcp-mssql-management.git//?ref=vX.Y.Z"
+  }
+
+  inputs = {
+    org = {
+      organization_name = "myorg"
+      organization_unit = "platform"
+      environment_type  = "production"
+      environment_name  = "prod"
+    }
+
+    spoke_def = "001"
+
+    # Cloud SQL connection (use one of: cloudsql, direct, or hoop)
+    cloudsql = {
+      enabled       = true
+      instance_name = "my-mssql-instance"
+      project_id    = "my-gcp-project"
+      from_secret   = false
+      server_name   = "my-mssql-server"
+      admin_username = "sqladmin"
+      admin_password = "supersecret"
+      db_name       = "master"
+    }
+
+    databases = {
+      appdb = {
+        name          = "appdb"
+        create_owner  = true
+        owner         = "appdb_owner"
+        default_collation         = "SQL_Latin1_General_CP1_CI_AS"
+        default_language          = "us_english"
+        check_password_expiration = false
+        check_password_policy     = true
+        must_change_password      = false
+      }
+    }
+
+    users = {
+      appuser = {
+        name                      = "appuser"
+        grant                     = "readwrite"
+        db_ref                    = "appdb"
+        default_language          = "us_english"
+        check_password_expiration = false
+        check_password_policy     = true
+        must_change_password      = false
+        import                    = false
+      }
+    }
+
+    hoop = {
+      enabled        = false
+      community      = true
+      agent_id       = ""
+      import         = false
+      tags           = {}
+      access_control = []
+    }
+
+    password_rotation_period = 90
+    force_reset              = false
+    secrets_kms_key_name     = null
+  }
+  ```
+
 examples: |-
+  See `usage` above for a complete Terragrunt example.
 
-# How to get started quickly
 quickstart: |-
+  1. Clone the repository and create your Terragrunt configuration using the `usage` example.
+  2. Set `cloudsql.enabled = true` (or `direct`) with the appropriate connection details.
+  3. Define your `databases` and `users` maps.
+  4. Run `terragrunt init && terragrunt apply`.
+  5. Retrieve user credentials from GCP Secret Manager using the secret IDs in the `users` output.
 
 include:
   - "docs/targets.md"

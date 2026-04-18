@@ -7,8 +7,8 @@
 #     Distributed Under Apache v2.0 License
 #
 
-resource "random_password" "owner" {
-  for_each         = { for k, db in var.databases : k => db if try(db.create_owner, false) }
+resource "random_password" "user" {
+  for_each         = var.users
   length           = 20
   special          = true
   override_special = "!#$%&*()-_=+[]{}<>:?"
@@ -18,10 +18,10 @@ resource "random_password" "owner" {
   min_special      = 2
 }
 
-resource "mssql_login" "owner" {
-  for_each                  = { for k, db in var.databases : k => db if try(db.create_owner, false) }
-  server_login              = try(each.value.owner, "${each.value.name}_owner")
-  login_password            = random_password.owner[each.key].result
+resource "mssql_login" "user" {
+  for_each                  = var.users
+  server_login              = each.value.name
+  login_password            = random_password.user[each.key].result
   default_language          = try(each.value.default_language, "us_english")
   check_password_expiration = try(each.value.check_password_expiration, false)
   check_password_policy     = try(each.value.check_password_policy, true)
