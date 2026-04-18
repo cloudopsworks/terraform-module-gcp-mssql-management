@@ -19,8 +19,8 @@ locals {
   }
   user_credentials = {
     for k, user in var.users : k => {
-      username    = user.name
-      password    = random_password.user[k].result
+      username    = module.db.owner_usernames[k]
+      password    = module.db.owner_passwords[k]
       host        = local.mssql_conn.host
       port        = local.mssql_conn.port
       dbname      = try(user.db_ref, "") != "" ? var.databases[user.db_ref].name : user.database_name

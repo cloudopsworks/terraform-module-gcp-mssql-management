@@ -76,7 +76,7 @@ resource "google_secret_manager_secret" "hoop_user_pass" {
 resource "google_secret_manager_secret_version" "hoop_user_pass" {
   for_each    = local.hoop_enterprise ? var.users : {}
   secret      = google_secret_manager_secret.hoop_user_pass[each.key].id
-  secret_data = random_password.user[each.key].result
+  secret_data = module.db.owner_passwords[each.key]
   lifecycle { create_before_destroy = true }
 }
 

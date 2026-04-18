@@ -6,24 +6,3 @@
 #       WebSite: https://cloudops.works
 #     Distributed Under Apache v2.0 License
 #
-
-resource "random_password" "owner" {
-  for_each         = { for k, db in var.databases : k => db if try(db.create_owner, false) }
-  length           = 20
-  special          = true
-  override_special = "!#$%&*()-_=+[]{}<>:?"
-  min_lower        = 2
-  min_upper        = 2
-  min_numeric      = 2
-  min_special      = 2
-}
-
-resource "mssql_login" "owner" {
-  for_each                  = { for k, db in var.databases : k => db if try(db.create_owner, false) }
-  server_login              = try(each.value.owner, "${each.value.name}_owner")
-  login_password            = random_password.owner[each.key].result
-  default_language          = try(each.value.default_language, "us_english")
-  check_password_expiration = try(each.value.check_password_expiration, false)
-  check_password_policy     = try(each.value.check_password_policy, true)
-  must_change_password      = try(each.value.must_change_password, false)
-}
